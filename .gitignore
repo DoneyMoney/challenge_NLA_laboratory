@@ -1,6 +1,4 @@
 .vscode/
-*.o
-*
-!*.*
 */question1
 .vscode/c_cpp_properties.json
+Challenge_1/outputImages/*
