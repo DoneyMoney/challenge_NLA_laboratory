@@ -1,5 +1,6 @@
-##Challange NLA
+## Challanges NLA
 
+# Challenge 1
 1) Load the image as an Eigen matrix with size m × n. Each entry in the matrix corresponds to a pixel on the screen and takes a value somewhere between 0 (black) and 255 (white). Report the size of the matrix. 
 2) Introduce a noise signal into the loaded image by adding random fluctuations of color ranging between [−50, 50] to each pixel. Export the resulting image in .png and upload it.
 3) Reshape the original and noisy images as vectors v and w, respectively. Verify that each vector has m n components. Report here the Euclidean norm of v.
