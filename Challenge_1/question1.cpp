@@ -18,6 +18,18 @@ int main(){
     return 1;
     }
 
+    Eigen::MatrixXd originalGrayEinstein(width,height);
+    for(int i=0;i<width;i++){
+        for(int j=0;j<height;j++){
+            int index = (i * width + j) * channels; 
+            originalGrayEinstein(i,j) = static_cast<double>(image_data[index]);
+        }
+    }
+
+    //Point 1
     std::cout << "Image loaded: " << width << "x" << height << " with " << channels << " channels." << std::endl;
+    std::cout << "Matrix of the original image: " << originalGrayEinstein << std::endl;
+    
+    
     return 0;
 }
