@@ -1,1 +1,1 @@
-g++ -I ${mkEigenInc} file.cpp -o file 
+g++ -I ${mkEigenInc} Solution.cpp -o Solution 
