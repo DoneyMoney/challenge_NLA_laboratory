@@ -27,43 +27,83 @@ int printImage(std::string path, int h , int w , Eigen::MatrixXd mat){
 }
 
 //We are assuming a 3x3 filter matrix 
-Eigen::MatrixXd computeConvMatr(int height, int width, MatrixXd filter){
+SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
 
-  Eigen::MatrixXd matr = Eigen::MatrixXd::Zero(height*width, height*width);
+  SparseMatrix<double> matr(height*width,height*width);
+  typedef Eigen::Triplet<double> T;
+  std::vector<T> tripletList;
+  tripletList.reserve(height * width * 9);
+
   for (int i=0; i < height*width; i++){
-    matr(i,i) = filter(1,1);
+    //matr.insert(i,i) = filter(1,1);
+    tripletList.push_back(T(i,i,filter(1,1)));
     if(i+4 < height*width){
-      matr(i,i+1) = filter(0,1);
-      matr(i,i+2) = filter(1,2);
-      matr(i,i+3) = filter(1,0);
-      matr(i,i+4) = filter(1,2);
+      tripletList.push_back(T(i,i+1,filter(0,1)));
+      tripletList.push_back(T(i,i+2,filter(1,2)));
+      tripletList.push_back(T(i,i+3,filter(0,0)));
+      tripletList.push_back(T(i,i+4,filter(0,2)));
+      /*
+      matr.insert(i,i+1) = filter(0,1);
+      matr.insert(i,i+2) = filter(1,2);
+      matr.insert(i,i+3) = filter(1,0);
+      matr.insert(i,i+4) = filter(1,2);
+      */
     }else if(i+3 < height*width){
-      matr(i,i+1) = filter(0,1);
-      matr(i,i+2) = filter(1,2);
-      matr(i,i+3) = filter(1,0);
+      tripletList.push_back(T(i,i+1,filter(0,1)));
+      tripletList.push_back(T(i,i+2,filter(1,2)));
+      tripletList.push_back(T(i,i+3,filter(0,0)));
+      /*
+      matr.insert(i,i+1) = filter(0,1);
+      matr.insert(i,i+2) = filter(1,2);
+      matr.insert(i,i+3) = filter(1,0);
+      */
     }else if(i+2 < height*width){
-      matr(i,i+1) = filter(0,1);
-      matr(i,i+2) = filter(1,2);
-    }else if(i+1 < height*width){
-      matr(i,i+1) = filter(0,1);
-    }
 
+      tripletList.push_back(T(i,i+1,filter(0,1)));
+      tripletList.push_back(T(i,i+2,filter(1,2)));
+      /*
+      matr.insert(i,i+1) = filter(0,1);
+      matr.insert(i,i+2) = filter(1,2);
+      */
+    }else if(i+1 < height*width){
+      
+      tripletList.push_back(T(i,i+1,filter(0,1)));
+      //matr.insert(i,i+1) = filter(0,1);
+    }
     if(i-4 >= 0){
-      matr(i,i-4) = filter(0,0);
-      matr(i,i-3) = filter(2,0);
-      matr(i,i-2) = filter(1,0);
-      matr(i,i-1) = filter(2,1);
+      tripletList.push_back(T(i,i-4,filter(2,2)));
+      tripletList.push_back(T(i,i-3,filter(2,0)));
+      tripletList.push_back(T(i,i-2,filter(1,0)));
+      tripletList.push_back(T(i,i-1,filter(2,1)));
+      /*
+      matr.insert(i,i-4) = filter(0,0);
+      matr.insert(i,i-3) = filter(2,0);
+      matr.insert(i,i-2) = filter(1,0);
+      matr.insert(i,i-1) = filter(2,1);
+      */
     }else if(i-3 >= 0){
-      matr(i,i-3) = filter(1,2);
-      matr(i,i-2) = filter(1,0);
-      matr(i,i-1) = filter(2,1);
+      tripletList.push_back(T(i,i-3,filter(2,0)));
+      tripletList.push_back(T(i,i-2,filter(1,0)));
+      tripletList.push_back(T(i,i-1,filter(2,1)));
+      /*
+      matr.insert(i,i-3) = filter(1,2);
+      matr.insert(i,i-2) = filter(1,0);
+      matr.insert(i,i-1) = filter(2,1);
+      */
     }else if(i-2 >= 0){
-      matr(i,i-2) = filter(1,0);
-      matr(i,i-1) = filter(1,2);
+      tripletList.push_back(T(i,i-2,filter(1,0)));
+      tripletList.push_back(T(i,i-1,filter(2,1)));
+      /*
+      matr.insert(i,i-2) = filter(1,0);
+      matr.insert(i,i-1) = filter(1,2);
+      */
     }else if(i-1 >= 0){
-      matr(i,i-1) = filter(1,2);
+      tripletList.push_back(T(i,i-1,filter(2,1)));
+      //matr.insert(i,i-1) = filter(1,2);
     }
   }
+
+  matr.setFromTriplets(tripletList.begin(), tripletList.end());
   return matr;
 }
 
@@ -139,23 +179,20 @@ int main(){
     std::cout << "The sizes of the matrix and the vector w DON'T corresponds" << std::endl;
   }
 
-  
-
   std::cout << "The vector v norm is: " << vector_V.norm() <<std::endl;
   
   //Point4
   Eigen::MatrixXd smoothedMatrix = Eigen::MatrixXd::Zero(height, width);
-  Eigen::MatrixXd Hav2(3,3);
-  Hav2 << 1/9, 1/9, 1/9,
-          1/9, 1/9, 1/9,
-          1/9, 1/9, 1/9;
+  Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3,3,0.1111111);
   
   //calculate convmatrixA1
   double mTimesn = height*width;
-  Matrix<double, Eigen::Dynamic, Eigen::Dynamic> convMatrixA1(height * width, height * width); //Here is the problem!!!
-  
+  SparseMatrix<double> convMatrixA1(height * width, height * width); 
+
   convMatrixA1 = computeConvMatr(height,width,Hav2);
-   
+
+  std::cout << "Sparse matrix: "<<std::endl << convMatrixA1.topLeftCorner(15,15) <<std::endl ;
+
   smoothedMatrix = convMatrixA1 * vector_V;
   int numOfNonZeroes = 0;
   for(int i = 0; i < smoothedMatrix.rows(); i++) {
@@ -166,9 +203,7 @@ int main(){
       }
   }
   std::cout << "Numer of non-zeroes from the A1*v matrix: " << numOfNonZeroes << " Shoulbe the the order of: " <<height*width <<std::endl;
-  
-  
-  
+
 
   return 0;
 }

@@ -79,9 +79,9 @@ int main(){
     
     //calculate convmatrixA1
     double mTimesn = height*width;
-    Matrix<double, Eigen::Dynamic, Eigen::Dynamic> convMatrixA1(height * width, height * width); //Here is the problem!!!
+    SparseMatrix<double> convMatrixA1(height * width, height * width); //Here is the problem!!!
     
-    convMatrixA1 = computeConvMatr(height,width,Hav2);
+    //convMatrixA1 = computeConvMatr(height,width,Hav2);
     
     //smoothedMatrix = convMatrixA1 * vector_V;
     int numOfNonZeroes = 0;
