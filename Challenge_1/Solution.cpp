@@ -103,6 +103,7 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
     }
   }
 
+  std::cout << "Number of non-zero elements from A1 is: " << tripletList.size() << std::endl;
   matr.setFromTriplets(tripletList.begin(), tripletList.end());
   return matr;
 }
@@ -194,16 +195,7 @@ int main(){
   std::cout << "Sparse matrix: "<<std::endl << convMatrixA1.topLeftCorner(15,15) <<std::endl ;
 
   smoothedMatrix = convMatrixA1 * vector_V;
-  int numOfNonZeroes = 0;
-  for(int i = 0; i < smoothedMatrix.rows(); i++) {
-      for(int j = 0; j < smoothedMatrix.cols(); j++) {
-          if(smoothedMatrix(i,j) != 0){
-            numOfNonZeroes++;
-          }
-      }
-  }
-  std::cout << "Numer of non-zeroes from the A1*v matrix: " << numOfNonZeroes << " Shoulbe the the order of: " <<height*width <<std::endl;
-
+  
 
   return 0;
 }
