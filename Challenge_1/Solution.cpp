@@ -151,7 +151,7 @@ int main(){
   //Point4
   Eigen::MatrixXd smoothedMatrix = Eigen::MatrixXd::Zero(height, width);
   double const oneOfNine = 1 / 9;
-  Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3,3,oneOfNine);
+  Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3,3,0.1111111111);
   
   //calculate convmatrixA1
   SparseMatrix<double> convMatrixA1(height * width, height * width); 
@@ -205,10 +205,18 @@ int main(){
   Eigen::saveMarket(convMatrixA2,matrixA2FileOut);
   Eigen::saveMarket(vector_W,vectorWFileOut);
 
-  VectorXd solutionX ;
+  //Point9
+  VectorXd solutionX(height*width);
   loadMarketVector(solutionX,"/Point8Files/sol.mtx"); 
-  printImage("outputImages/point9Image.png",solutionX.size(),1,solutionX);
-
+  Eigen::MatrixXd solutionXMatrix(height,width);
+  
+  for(int i=0;i<height;i++){
+      for(int j=0;j<width;j++){
+          int index = (i * width + j); 
+          solutionXMatrix(i,j) = static_cast<double>(solutionX[index]);
+      }
+  }
+  printImage("outputImages/point9Image.png",height,width,solutionXMatrix);
 
 
 
