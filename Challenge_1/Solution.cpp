@@ -218,6 +218,27 @@ int main(){
   }
   printImage("outputImages/point9Image.png",height,width,solutionXMatrix);
 
+  //Point 10
+  Eigen::MatrixXd Hlap(3,3);
+  Hlap << 0, -1, 0,
+          -1, 4, -1,
+          0, -1, 0;
+
+  SparseMatrix<double> convMatrixA3(height * width, height * width); 
+  convMatrixA3 = computeConvMatr(height,width,Hlap);
+
+  SparseMatrix<double> convMatrixA3_transpose = convMatrixA3.transpose();
+  if (convMatrixA3.isApprox(convMatrixA3_transpose)) {
+    std::cout << "convMatrixA3 is symmetric." << std::endl;
+  } else {
+    std::cout << "convMatrixA3 is not symmetric." << std::endl;
+  }
+
+  //Point 11
+  Eigen::MatrixXd matrixWithEdgeDetection(height,width);
+  matrixWithEdgeDetection = convMatrixA3 * vector_V;
+
+  printImage("outputImages/imageWithEdgeDetection.png",height,width,matrixWithEdgeDetection);
 
 
   return 0;
