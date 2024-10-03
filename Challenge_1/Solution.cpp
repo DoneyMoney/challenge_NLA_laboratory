@@ -1,6 +1,7 @@
 #include <Eigen/Eigen>
 #include <iostream>
 #include <cstdlib>
+#include <unsupported/Eigen/SparseExtra>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../external_libraries/stb_image.h"
@@ -41,64 +42,30 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
       tripletList.push_back(T(i,i+2,filter(0,1)));
       tripletList.push_back(T(i,i+3,filter(0,0)));
       tripletList.push_back(T(i,i+4,filter(0,2)));
-      /*
-      matr.insert(i,i+1) = filter(0,1);
-      matr.insert(i,i+2) = filter(1,2);
-      matr.insert(i,i+3) = filter(1,0);
-      matr.insert(i,i+4) = filter(1,2);
-      */
     }else if(i+3 < height*width){
       tripletList.push_back(T(i,i+1,filter(1,2)));
       tripletList.push_back(T(i,i+2,filter(0,1)));
       tripletList.push_back(T(i,i+3,filter(0,0)));
-      /*
-      matr.insert(i,i+1) = filter(0,1);
-      matr.insert(i,i+2) = filter(1,2);
-      matr.insert(i,i+3) = filter(1,0);
-      */
     }else if(i+2 < height*width){
-
       tripletList.push_back(T(i,i+1,filter(1,2)));
       tripletList.push_back(T(i,i+2,filter(0,1)));
-      /*
-      matr.insert(i,i+1) = filter(0,1);
-      matr.insert(i,i+2) = filter(1,2);
-      */
     }else if(i+1 < height*width){
-      
       tripletList.push_back(T(i,i+1,filter(1,2)));
-      //matr.insert(i,i+1) = filter(0,1);
     }
     if(i-4 >= 0){
       tripletList.push_back(T(i,i-4,filter(2,2)));
       tripletList.push_back(T(i,i-3,filter(2,0)));
       tripletList.push_back(T(i,i-2,filter(2,1)));
       tripletList.push_back(T(i,i-1,filter(1,0)));
-      /*
-      matr.insert(i,i-4) = filter(0,0);
-      matr.insert(i,i-3) = filter(2,0);
-      matr.insert(i,i-2) = filter(1,0);
-      matr.insert(i,i-1) = filter(2,1);
-      */
     }else if(i-3 >= 0){
       tripletList.push_back(T(i,i-3,filter(2,0)));
       tripletList.push_back(T(i,i-2,filter(2,1)));
       tripletList.push_back(T(i,i-1,filter(1,0)));
-      /*
-      matr.insert(i,i-3) = filter(1,2);
-      matr.insert(i,i-2) = filter(1,0);
-      matr.insert(i,i-1) = filter(2,1);
-      */
     }else if(i-2 >= 0){
       tripletList.push_back(T(i,i-2,filter(2,1)));
       tripletList.push_back(T(i,i-1,filter(1,0)));
-      /*
-      matr.insert(i,i-2) = filter(1,0);
-      matr.insert(i,i-1) = filter(1,2);
-      */
     }else if(i-1 >= 0){
       tripletList.push_back(T(i,i-1,filter(1,0)));
-      //matr.insert(i,i-1) = filter(1,2);
     }
   }
 
@@ -183,7 +150,8 @@ int main(){
   
   //Point4
   Eigen::MatrixXd smoothedMatrix = Eigen::MatrixXd::Zero(height, width);
-  Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3,3,0.1111111);
+  double const oneOfNine = 1 / 9;
+  Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3,3,oneOfNine);
   
   //calculate convmatrixA1
   SparseMatrix<double> convMatrixA1(height * width, height * width); 
@@ -195,8 +163,6 @@ int main(){
   } else {
     std::cout << "convMatrixA1 is not symmetric." << std::endl;
   }
-
-  //std::cout << "Sparse matrix: "<<std::endl << convMatrixA1.topLeftCorner(15,15) <<std::endl ;
 
   smoothedMatrix = convMatrixA1 * vector_V;
   
@@ -232,6 +198,12 @@ int main(){
 
   printImage("outputImages/sharpenedImage.png",height,width,sharpenedMatrix);
 
+  //Point 8
+  std::string matrixA2FileOut("./matrices/A2matrix.mtx");
+  std::string vectorWFileOut("./matrices/Wvector.mtx");
+
+  Eigen::saveMarket(convMatrixA2,matrixA2FileOut);
+  Eigen::saveMarket(vector_W,vectorWFileOut);
 
   return 0;
 }
