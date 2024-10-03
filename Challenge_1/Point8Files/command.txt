@@ -1,0 +1,3 @@
+command for run the execution (inside Challenge 1):
+
+    ./test1 Point8Files/A2matrix.mtx 1 Point8Files/sol.mtx Point8Files/residualHistory.txt Point8Files/Wvector.mtx -i gmres -tol 1.0e-9 -p SSOR  

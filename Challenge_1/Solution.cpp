@@ -199,11 +199,18 @@ int main(){
   printImage("outputImages/sharpenedImage.png",height,width,sharpenedMatrix);
 
   //Point 8
-  std::string matrixA2FileOut("./matrices/A2matrix.mtx");
-  std::string vectorWFileOut("./matrices/Wvector.mtx");
+  std::string matrixA2FileOut("./Point8Files/A2matrix.mtx");
+  std::string vectorWFileOut("./Point8Files/Wvector.mtx");
 
   Eigen::saveMarket(convMatrixA2,matrixA2FileOut);
   Eigen::saveMarket(vector_W,vectorWFileOut);
+
+  VectorXd solutionX ;
+  loadMarketVector(solutionX,"/Point8Files/sol.mtx"); 
+  printImage("outputImages/point9Image.png",solutionX.size(),1,solutionX);
+
+
+
 
   return 0;
 }
