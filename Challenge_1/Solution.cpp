@@ -261,5 +261,16 @@ int main(){
   std::cout << "The system resolution for Point 12 ended with " <<solver.iterations()
    << " iteration and with a residual of: " << solver.error() <<std::endl;
   
+  //Point 13
+  Eigen::MatrixXd solutionYMatrix(height,width);
+  for(int i=0;i<height;i++){
+      for(int j=0;j<width;j++){
+          int index = (i * width + j); 
+          solutionYMatrix(i,j) = static_cast<double>(solutionY[index]);
+      }
+  }
+  printImage("outputImages/point13Image.png",height,width,solutionYMatrix);
+
+
   return 0;
 }
