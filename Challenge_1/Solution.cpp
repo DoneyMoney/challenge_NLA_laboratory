@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <unsupported/Eigen/SparseExtra>
+#include <Eigen/IterativeLinearSolvers>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../external_libraries/stb_image.h"
@@ -240,6 +241,25 @@ int main(){
 
   printImage("outputImages/imageWithEdgeDetection.png",height,width,matrixWithEdgeDetection);
 
+  //Point 12
+  SparseMatrix<double> identityMatrix(height * width,height * width);
+  identityMatrix.reserve(height*width);
+  for(int i=0;i < height*width;i++) identityMatrix.insert(i,i) = 1.0;
 
+  SparseMatrix<double> identityPlusA3(height * width,height * width);
+  identityPlusA3 = identityMatrix + convMatrixA3;
+  // Solving 
+  BiCGSTAB<Eigen::SparseMatrix<double> > solver(identityPlusA3);   // factorization 
+  solver.setTolerance(1e-10);
+  solver.compute(identityPlusA3);
+  if(solver.info()!=Success) {                                 
+      std::cout << "cannot factorize the matrix" << std::endl;          
+      return 0;
+  }
+  
+  VectorXd solutionY = solver.solve(vector_W);                   
+  std::cout << "The system resolution for Point 12 ended with " <<solver.iterations()
+   << " iteration and with a residual of: " << solver.error() <<std::endl;
+  
   return 0;
 }
