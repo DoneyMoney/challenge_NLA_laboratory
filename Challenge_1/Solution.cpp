@@ -35,11 +35,10 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
   tripletList.reserve(height * width * 9);
 
   for (int i=0; i < height*width; i++){
-    //matr.insert(i,i) = filter(1,1);
     tripletList.push_back(T(i,i,filter(1,1)));
     if(i+4 < height*width){
-      tripletList.push_back(T(i,i+1,filter(0,1)));
-      tripletList.push_back(T(i,i+2,filter(1,2)));
+      tripletList.push_back(T(i,i+1,filter(1,2)));
+      tripletList.push_back(T(i,i+2,filter(0,1)));
       tripletList.push_back(T(i,i+3,filter(0,0)));
       tripletList.push_back(T(i,i+4,filter(0,2)));
       /*
@@ -49,8 +48,8 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
       matr.insert(i,i+4) = filter(1,2);
       */
     }else if(i+3 < height*width){
-      tripletList.push_back(T(i,i+1,filter(0,1)));
-      tripletList.push_back(T(i,i+2,filter(1,2)));
+      tripletList.push_back(T(i,i+1,filter(1,2)));
+      tripletList.push_back(T(i,i+2,filter(0,1)));
       tripletList.push_back(T(i,i+3,filter(0,0)));
       /*
       matr.insert(i,i+1) = filter(0,1);
@@ -59,22 +58,22 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
       */
     }else if(i+2 < height*width){
 
-      tripletList.push_back(T(i,i+1,filter(0,1)));
-      tripletList.push_back(T(i,i+2,filter(1,2)));
+      tripletList.push_back(T(i,i+1,filter(1,2)));
+      tripletList.push_back(T(i,i+2,filter(0,1)));
       /*
       matr.insert(i,i+1) = filter(0,1);
       matr.insert(i,i+2) = filter(1,2);
       */
     }else if(i+1 < height*width){
       
-      tripletList.push_back(T(i,i+1,filter(0,1)));
+      tripletList.push_back(T(i,i+1,filter(1,2)));
       //matr.insert(i,i+1) = filter(0,1);
     }
     if(i-4 >= 0){
       tripletList.push_back(T(i,i-4,filter(2,2)));
       tripletList.push_back(T(i,i-3,filter(2,0)));
-      tripletList.push_back(T(i,i-2,filter(1,0)));
-      tripletList.push_back(T(i,i-1,filter(2,1)));
+      tripletList.push_back(T(i,i-2,filter(2,1)));
+      tripletList.push_back(T(i,i-1,filter(1,0)));
       /*
       matr.insert(i,i-4) = filter(0,0);
       matr.insert(i,i-3) = filter(2,0);
@@ -83,27 +82,27 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
       */
     }else if(i-3 >= 0){
       tripletList.push_back(T(i,i-3,filter(2,0)));
-      tripletList.push_back(T(i,i-2,filter(1,0)));
-      tripletList.push_back(T(i,i-1,filter(2,1)));
+      tripletList.push_back(T(i,i-2,filter(2,1)));
+      tripletList.push_back(T(i,i-1,filter(1,0)));
       /*
       matr.insert(i,i-3) = filter(1,2);
       matr.insert(i,i-2) = filter(1,0);
       matr.insert(i,i-1) = filter(2,1);
       */
     }else if(i-2 >= 0){
-      tripletList.push_back(T(i,i-2,filter(1,0)));
-      tripletList.push_back(T(i,i-1,filter(2,1)));
+      tripletList.push_back(T(i,i-2,filter(2,1)));
+      tripletList.push_back(T(i,i-1,filter(1,0)));
       /*
       matr.insert(i,i-2) = filter(1,0);
       matr.insert(i,i-1) = filter(1,2);
       */
     }else if(i-1 >= 0){
-      tripletList.push_back(T(i,i-1,filter(2,1)));
+      tripletList.push_back(T(i,i-1,filter(1,0)));
       //matr.insert(i,i-1) = filter(1,2);
     }
   }
 
-  std::cout << "Number of non-zero elements from A1 is: " << tripletList.size() << std::endl;
+  std::cout << "Number of non-zero elements from matrix is: " << tripletList.size() << std::endl;
   matr.setFromTriplets(tripletList.begin(), tripletList.end());
   return matr;
 }
@@ -187,15 +186,52 @@ int main(){
   Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3,3,0.1111111);
   
   //calculate convmatrixA1
-  double mTimesn = height*width;
   SparseMatrix<double> convMatrixA1(height * width, height * width); 
-
   convMatrixA1 = computeConvMatr(height,width,Hav2);
 
-  std::cout << "Sparse matrix: "<<std::endl << convMatrixA1.topLeftCorner(15,15) <<std::endl ;
+  SparseMatrix<double> convMatrixA1_transpose = convMatrixA1.transpose();
+  if (convMatrixA1.isApprox(convMatrixA1_transpose)) {
+    std::cout << "convMatrixA1 is symmetric." << std::endl;
+  } else {
+    std::cout << "convMatrixA1 is not symmetric." << std::endl;
+  }
+
+  //std::cout << "Sparse matrix: "<<std::endl << convMatrixA1.topLeftCorner(15,15) <<std::endl ;
 
   smoothedMatrix = convMatrixA1 * vector_V;
   
+  //Point 5
+  Eigen::MatrixXd smoothedNoisyMatrix = Eigen::MatrixXd::Zero(height, width);
+  smoothedNoisyMatrix = convMatrixA1 * vector_W;
+
+  printImage("outputImages/smoothedNoisyImage.png",height,width,smoothedNoisyMatrix);
+
+  //Point 6
+  Eigen::MatrixXd Hsh2(3, 3);
+  Hsh2 << 0, -3, 0,
+          -1, 9, -3,
+          0, -1, 0;
+
+  SparseMatrix<double> convMatrixA2(height * width, height * width); 
+  convMatrixA2 = computeConvMatr(height,width,Hsh2);
+
+  // Ensure convMatrixA2 is symmetric
+  //Il metodo isApprox() di Eigen verifica se due matrici sono approssimativamente uguali,
+  //tenendo conto di eventuali errori numerici. È consigliato per matrici con numeri a virgola mobile.
+  //Il controllo elemento per elemento killava il processo
+  SparseMatrix<double> convMatrixA2_transpose = convMatrixA2.transpose();
+  if (convMatrixA2.isApprox(convMatrixA2_transpose)) {
+    std::cout << "convMatrixA2 is symmetric." << std::endl;
+  } else {
+    std::cout << "convMatrixA2 is not symmetric." << std::endl;
+  }
+
+  //Point 7
+  Eigen::MatrixXd sharpenedMatrix = Eigen::MatrixXd::Zero(height, width);
+  sharpenedMatrix = convMatrixA2 * vector_V;
+
+  printImage("outputImages/sharpenedImage.png",height,width,sharpenedMatrix);
+
 
   return 0;
 }
