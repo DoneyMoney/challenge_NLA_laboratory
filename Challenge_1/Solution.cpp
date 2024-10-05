@@ -31,7 +31,7 @@ int printImage(std::string path, int h , int w , Eigen::MatrixXd mat){
 //We are assuming a 3x3 filter matrix 
 SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
 
-  SparseMatrix<double> matr(height*width,height*width);
+  SparseMatrix<double> matr(height*width, height*width);
   typedef Eigen::Triplet<double> T;
   std::vector<T> tripletList;
   tripletList.reserve(height * width * 9);
@@ -69,7 +69,6 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
       tripletList.push_back(T(i,i-1,filter(1,0)));
     }
   }
-
   std::cout << "Number of non-zero elements from matrix is: " << tripletList.size() << std::endl;
   matr.setFromTriplets(tripletList.begin(), tripletList.end());
   return matr;
@@ -89,7 +88,7 @@ int main(){
     return 1;
   }
 
-  //Point 1
+  //POINT_1
   Eigen::MatrixXd originalEinsteinMat(height,width);
   for(int i=0;i<height;i++){
       for(int j=0;j<width;j++){
@@ -98,29 +97,34 @@ int main(){
       }
   }
 
-  printImage("outputImages/testFirstOutput.png",height,width,originalEinsteinMat);
+  printImage("outputImages/0_testFirstOutput.png", height, width, originalEinsteinMat);
 
   std::cout << "Image loaded: " << width << "x" << height << " with " << channels << " channels." << std::endl;
   stbi_image_free(image_data);
 
-  //Point2
-  Eigen::MatrixXd noise = Eigen::MatrixXd::Random(height,width);
+  //POINT_2 - noise_matrix contains the value [-50; 50]
+  // noysi_image is the matrix which represents the image with noise
+  Eigen::MatrixXd noise_matrix = Eigen::MatrixXd::Random(height,width);
+  Eigen::MatrixXd noise_image = originalEinsteinMat;
 
-  Eigen::MatrixXd noisy_image = originalEinsteinMat;
   for(int i = 0; i<height;i++){
     for(int j=0;j<width;j++){
-      noisy_image(i,j) = noisy_image(i,j) + (noise(i,j) * 50);
-      noisy_image(i,j) = noisy_image(i,j) > 255.0 ? 255.0 : noisy_image(i,j);
-      noisy_image(i,j) = noisy_image(i,j) < 0 ? 0 : noisy_image(i,j);
+      noise_image(i,j) = noise_image(i,j) + (noise_matrix(i,j) * 50);
+      noise_image(i,j) = noise_image(i,j) > 255.0 ? 255.0 : noise_image(i,j);
+      noise_image(i,j) = noise_image(i,j) < 0 ? 0 : noise_image(i,j);
     }
   }
-  printImage("outputImages/noisyImage.png",height,width,noisy_image);
+  printImage("outputImages/2_noisyImage.png", height, width, noise_image);
 
-  //Point3
+  // POINT_3 - v and w vectors with m*n components. And norm of 'v' vector
+  // v = vector from original image
+  // w = vector from noise image
   Eigen::VectorXd vector_V(originalEinsteinMat.size());
   int index = 0;
-  for(int i = 0; i < originalEinsteinMat.rows(); i++) {
-      for(int j = 0; j < originalEinsteinMat.cols(); j++) {
+  int row = originalEinsteinMat.rows();
+  int col = originalEinsteinMat.cols();
+  for(int i = 0; i < row; i++) {
+      for(int j = 0; j < col; j++) {
           vector_V(index) = originalEinsteinMat(i, j);
           index++;
       }
@@ -132,11 +136,11 @@ int main(){
     std::cout << "The sizes of the matrix and the vector v DON'T corresponds" << std::endl;
   }
 
-  Eigen::VectorXd vector_W(noisy_image.size());
+  Eigen::VectorXd vector_W(noise_image.size());
   index = 0;
-  for(int i = 0; i < noisy_image.rows(); i++) {
-      for(int j = 0; j < noisy_image.cols(); j++) {
-          vector_W(index) = noisy_image(i, j);
+  for(int i = 0; i < noise_image.rows(); i++) {
+      for(int j = 0; j < noise_image.cols(); j++) {
+          vector_W(index) = noise_image(i, j);
           index++;
       }
   }
@@ -146,17 +150,16 @@ int main(){
   else{
     std::cout << "The sizes of the matrix and the vector w DON'T corresponds" << std::endl;
   }
-
   std::cout << "The vector v norm is: " << vector_V.norm() <<std::endl;
   
-  //Point4
+  //POINT_4
   Eigen::MatrixXd smoothedMatrix = Eigen::MatrixXd::Zero(height, width);
-  double const oneOfNine = 1 / 9;
-  Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3,3,0.1111111111);
+  double const oneOfNine = 1.0 / 9.0;
+  Eigen::MatrixXd Hav2 = Eigen::MatrixXd::Constant(3, 3, oneOfNine);
   
-  //calculate convmatrixA1
+  //calculate convMatrixA1
   SparseMatrix<double> convMatrixA1(height * width, height * width); 
-  convMatrixA1 = computeConvMatr(height,width,Hav2);
+  convMatrixA1 = computeConvMatr(height, width, Hav2);
 
   SparseMatrix<double> convMatrixA1_transpose = convMatrixA1.transpose();
   if (convMatrixA1.isApprox(convMatrixA1_transpose)) {
@@ -164,23 +167,22 @@ int main(){
   } else {
     std::cout << "convMatrixA1 is not symmetric." << std::endl;
   }
-
   smoothedMatrix = convMatrixA1 * vector_V;
   
-  //Point 5
+  //POINT_5
   Eigen::MatrixXd smoothedNoisyMatrix = Eigen::MatrixXd::Zero(height, width);
   smoothedNoisyMatrix = convMatrixA1 * vector_W;
 
-  printImage("outputImages/smoothedNoisyImage.png",height,width,smoothedNoisyMatrix);
+  printImage("outputImages/5_smoothedNoisyImage.png", height, width, smoothedNoisyMatrix);
 
-  //Point 6
+  //POINT_6
   Eigen::MatrixXd Hsh2(3, 3);
   Hsh2 << 0, -3, 0,
           -1, 9, -3,
           0, -1, 0;
 
   SparseMatrix<double> convMatrixA2(height * width, height * width); 
-  convMatrixA2 = computeConvMatr(height,width,Hsh2);
+  convMatrixA2 = computeConvMatr(height, width, Hsh2);
 
   // Ensure convMatrixA2 is symmetric
   //Il metodo isApprox() di Eigen verifica se due matrici sono approssimativamente uguali,
@@ -193,22 +195,22 @@ int main(){
     std::cout << "convMatrixA2 is not symmetric." << std::endl;
   }
 
-  //Point 7
+  //POINT_7
   Eigen::MatrixXd sharpenedMatrix = Eigen::MatrixXd::Zero(height, width);
   sharpenedMatrix = convMatrixA2 * vector_V;
 
-  printImage("outputImages/sharpenedImage.png",height,width,sharpenedMatrix);
+  printImage("outputImages/7_sharpenedImage.png",height, width, sharpenedMatrix);
 
-  //Point 8
+  //POINT_8
   std::string matrixA2FileOut("./Point8Files/A2matrix.mtx");
   std::string vectorWFileOut("./Point8Files/Wvector.mtx");
 
-  Eigen::saveMarket(convMatrixA2,matrixA2FileOut);
-  Eigen::saveMarket(vector_W,vectorWFileOut);
+  Eigen::saveMarket(convMatrixA2, matrixA2FileOut);
+  Eigen::saveMarket(vector_W, vectorWFileOut);
 
-  //Point9
+  //POINT_9
   VectorXd solutionX(height*width);
-  loadMarketVector(solutionX,"/Point8Files/sol.mtx"); 
+  loadMarketVector(solutionX,"/Point8Files/sol.mtx");
   Eigen::MatrixXd solutionXMatrix(height,width);
   
   for(int i=0;i<height;i++){
@@ -217,9 +219,9 @@ int main(){
           solutionXMatrix(i,j) = static_cast<double>(solutionX[index]);
       }
   }
-  printImage("outputImages/point9Image.png",height,width,solutionXMatrix);
+  printImage("outputImages/9_Image.png",height, width, solutionXMatrix);
 
-  //Point 10
+  //POINT_10
   Eigen::MatrixXd Hlap(3,3);
   Hlap << 0, -1, 0,
           -1, 4, -1,
@@ -235,18 +237,17 @@ int main(){
     std::cout << "convMatrixA3 is not symmetric." << std::endl;
   }
 
-  //Point 11
+  //POINT_11
   Eigen::MatrixXd matrixWithEdgeDetection(height,width);
   matrixWithEdgeDetection = convMatrixA3 * vector_V;
+  printImage("outputImages/11_imageWithEdgeDetection.png",height,width,matrixWithEdgeDetection);
 
-  printImage("outputImages/imageWithEdgeDetection.png",height,width,matrixWithEdgeDetection);
-
-  //Point 12
-  SparseMatrix<double> identityMatrix(height * width,height * width);
+  //POINT_12
+  SparseMatrix<double> identityMatrix(height * width, height * width);
   identityMatrix.reserve(height*width);
   for(int i=0;i < height*width;i++) identityMatrix.insert(i,i) = 1.0;
 
-  SparseMatrix<double> identityPlusA3(height * width,height * width);
+  SparseMatrix<double> identityPlusA3(height * width, height * width);
   identityPlusA3 = identityMatrix + convMatrixA3;
   // Solving 
   BiCGSTAB<Eigen::SparseMatrix<double> > solver(identityPlusA3);   // factorization 
@@ -261,7 +262,7 @@ int main(){
   std::cout << "The system resolution for Point 12 ended with " <<solver.iterations()
    << " iteration and with a residual of: " << solver.error() <<std::endl;
   
-  //Point 13
+  //POINT_13
   Eigen::MatrixXd solutionYMatrix(height,width);
   for(int i=0;i<height;i++){
       for(int j=0;j<width;j++){
@@ -269,7 +270,7 @@ int main(){
           solutionYMatrix(i,j) = static_cast<double>(solutionY[index]);
       }
   }
-  printImage("outputImages/point13Image.png",height,width,solutionYMatrix);
+  printImage("outputImages/13_Image.png",height,width,solutionYMatrix);
 
 
   return 0;
