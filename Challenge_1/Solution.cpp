@@ -31,47 +31,18 @@ int printImage(std::string path, int h , int w , Eigen::MatrixXd mat){
 //We are assuming a 3x3 filter matrix 
 SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
 
+  // Verifica che il filtro sia una matrice 3x3
+  if (filter.rows() != 3 || filter.cols() != 3) {
+    std::cerr << "Error: Filter must be a 3x3 matrix" << std::endl;
+    return SparseMatrix<double>();
+  }
+
   SparseMatrix<double> matr(height*width, height*width);
   typedef Eigen::Triplet<double> T;
   std::vector<T> tripletList;
   tripletList.reserve(height * width * 9);
-  /*
-  for (int i=0; i < height*width; i++){
-    tripletList.push_back(T(i,i,filter(1,1)));
-    if(i+4 < height*width){
-      tripletList.push_back(T(i,i+1,filter(1,2)));
-      tripletList.push_back(T(i,i+2,filter(0,1)));
-      tripletList.push_back(T(i,i+3,filter(0,0)));
-      tripletList.push_back(T(i,i+4,filter(0,2)));
-    }else if(i+3 < height*width){
-      tripletList.push_back(T(i,i+1,filter(1,2)));
-      tripletList.push_back(T(i,i+2,filter(0,1)));
-      tripletList.push_back(T(i,i+3,filter(0,0)));
-    }else if(i+2 < height*width){
-      tripletList.push_back(T(i,i+1,filter(1,2)));
-      tripletList.push_back(T(i,i+2,filter(0,1)));
-    }else if(i+1 < height*width){
-      tripletList.push_back(T(i,i+1,filter(1,2)));
-    }
-    if(i-4 >= 0){
-      tripletList.push_back(T(i,i-4,filter(2,2)));
-      tripletList.push_back(T(i,i-3,filter(2,0)));
-      tripletList.push_back(T(i,i-2,filter(2,1)));
-      tripletList.push_back(T(i,i-1,filter(1,0)));
-    }else if(i-3 >= 0){
-      tripletList.push_back(T(i,i-3,filter(2,0)));
-      tripletList.push_back(T(i,i-2,filter(2,1)));
-      tripletList.push_back(T(i,i-1,filter(1,0)));
-    }else if(i-2 >= 0){
-      tripletList.push_back(T(i,i-2,filter(2,1)));
-      tripletList.push_back(T(i,i-1,filter(1,0)));
-    }else if(i-1 >= 0){
-      tripletList.push_back(T(i,i-1,filter(1,0)));
-    }
-  }
-  */
-  int max_col = height*width;
-  for (int i=0; i < height*width; i++){
+ // int max_col = height*width;
+ /*for (int i=0; i < height*width; i++){
     tripletList.push_back(T(i,i,filter(1,1)));
     int a=0, b=0;
     for(int j = -4; j<5; j++){
@@ -83,6 +54,63 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
         b = 0;
         a++;
       }
+    }
+  }*/
+
+ for (int x = 0; x < height; x++) {
+    for (int y = 0; y < width; y++) {
+      int centerIndex = x * width + y;
+
+      // Pixel sopra
+      if (x > 0) {
+        int aboveIndex = (x - 1) * width + y;
+        tripletList.push_back(T(centerIndex, aboveIndex, filter(0, 1)));
+      }
+
+      // Pixel sotto
+      if (x < height - 1) {
+        int belowIndex = (x + 1) * width + y;
+        tripletList.push_back(T(centerIndex, belowIndex, filter(2, 1)));
+      }
+
+      // Pixel sinistra
+      if (y > 0) {
+        int leftIndex = x * width + y - 1;
+        tripletList.push_back(T(centerIndex, leftIndex, filter(1, 0)));
+      }
+
+      // Pixel destra
+      if (y < width - 1) {
+        int rightIndex = x * width + y + 1;
+        tripletList.push_back(T(centerIndex, rightIndex, filter(1, 2)));
+      }
+
+      // Pixel diagonale in alto a destra
+       if (x > 0 && y > 0) {
+        int topLeftIndex = (x - 1) * width + y - 1;
+        tripletList.push_back(T(centerIndex, topLeftIndex, filter(0, 0)));
+      }
+
+      // Pixel diagonale in alto a destra
+      if (x > 0 && y < width - 1) {
+        int topRightIndex = (x - 1) * width + y + 1;
+        tripletList.push_back(T(centerIndex, topRightIndex, filter(0, 2)));
+      }
+
+      // Pixel diagonale in basso a sinistra
+      if (x < height - 1 && y > 0) {
+        int bottomLeftIndex = (x + 1) * width + y - 1;
+        tripletList.push_back(T(centerIndex, bottomLeftIndex, filter(2, 0)));
+      }
+
+      // Pixel diagonale in basso a destra
+      if (x < height - 1 && y < width - 1) {
+        int bottomRightIndex = (x + 1) * width + y + 1;
+        tripletList.push_back(T(centerIndex, bottomRightIndex, filter(2, 2)));
+      }
+
+      // Pixel centrale
+      tripletList.push_back(T(centerIndex, centerIndex, filter(1, 1)));
     }
   }
   std::cout << "Number of non-zero elements from matrix is: " << tripletList.size() << std::endl;
@@ -210,6 +238,9 @@ int main(){
   } else {
     std::cout << "convMatrixA2 is not symmetric." << std::endl;
   }
+
+  //std::cout << "Sparse matrix: "<<std::endl << convMatrixA1.topLeftCorner(50,50) <<std::endl ;
+  //std::cout << "Sparse matrix: "<<std::endl << convMatrixA2.topLeftCorner(50,50) <<std::endl ;
 
   //POINT_7
   Eigen::MatrixXd sharpenedMatrix = Eigen::MatrixXd::Zero(height, width);
