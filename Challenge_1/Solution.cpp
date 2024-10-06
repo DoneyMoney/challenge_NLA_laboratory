@@ -35,7 +35,7 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
   typedef Eigen::Triplet<double> T;
   std::vector<T> tripletList;
   tripletList.reserve(height * width * 9);
-
+  /*
   for (int i=0; i < height*width; i++){
     tripletList.push_back(T(i,i,filter(1,1)));
     if(i+4 < height*width){
@@ -67,6 +67,22 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
       tripletList.push_back(T(i,i-1,filter(1,0)));
     }else if(i-1 >= 0){
       tripletList.push_back(T(i,i-1,filter(1,0)));
+    }
+  }
+  */
+  int max_col = height*width;
+  for (int i=0; i < height*width; i++){
+    tripletList.push_back(T(i,i,filter(1,1)));
+    int a=0, b=0;
+    for(int j = -4; j<5; j++){
+      if(i+j >= 0 && i+j<max_col && j!=0){
+        tripletList.push_back(T(i, i+j, filter(a,b)));
+      }
+      b++;
+      if(b>=3){
+        b = 0;
+        a++;
+      }
     }
   }
   std::cout << "Number of non-zero elements from matrix is: " << tripletList.size() << std::endl;
