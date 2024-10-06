@@ -41,23 +41,8 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
   typedef Eigen::Triplet<double> T;
   std::vector<T> tripletList;
   tripletList.reserve(height * width * 9);
- // int max_col = height*width;
- /*for (int i=0; i < height*width; i++){
-    tripletList.push_back(T(i,i,filter(1,1)));
-    int a=0, b=0;
-    for(int j = -4; j<5; j++){
-      if(i+j >= 0 && i+j<max_col && j!=0){
-        tripletList.push_back(T(i, i+j, filter(a,b)));
-      }
-      b++;
-      if(b>=3){
-        b = 0;
-        a++;
-      }
-    }
-  }*/
 
- for (int x = 0; x < height; x++) {
+  for (int x = 0; x < height; x++) {
     for (int y = 0; y < width; y++) {
       int centerIndex = x * width + y;
 
