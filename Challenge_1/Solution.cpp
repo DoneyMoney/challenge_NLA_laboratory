@@ -103,7 +103,15 @@ SparseMatrix<double> computeConvMatr(int height, int width, MatrixXd filter){
   return matr;
 }
 
-
+Eigen::MatrixXd rangeCheck (Eigen::MatrixXd matrix){
+    // Ensure values are within the range [0, 255]
+  for(int i = 0; i < matrix.rows(); i++) {
+    for(int j = 0; j < matrix.cols(); j++) {
+      matrix(i, j) = std::min(255.0, std::max(0.0, matrix(i, j)));
+    }
+  }
+  return matrix;
+}
 
 int main(){
   
@@ -202,6 +210,8 @@ int main(){
   Eigen::MatrixXd smoothedNoisyMatrix = Eigen::MatrixXd::Zero(height, width);
   smoothedNoisyMatrix = convMatrixA1 * vector_W;
 
+  smoothedNoisyMatrix= rangeCheck(smoothedNoisyMatrix);
+
   printImage("outputImages/5_smoothedNoisyImage.png", height, width, smoothedNoisyMatrix);
 
   //POINT_6
@@ -224,12 +234,13 @@ int main(){
     std::cout << "convMatrixA2 is not symmetric." << std::endl;
   }
 
-  //std::cout << "Sparse matrix: "<<std::endl << convMatrixA1.topLeftCorner(50,50) <<std::endl ;
   //std::cout << "Sparse matrix: "<<std::endl << convMatrixA2.topLeftCorner(50,50) <<std::endl ;
 
   //POINT_7
   Eigen::MatrixXd sharpenedMatrix = Eigen::MatrixXd::Zero(height, width);
   sharpenedMatrix = convMatrixA2 * vector_V;
+
+  sharpenedMatrix= rangeCheck(sharpenedMatrix);
 
   printImage("outputImages/7_sharpenedImage.png",height, width, sharpenedMatrix);
 
@@ -272,6 +283,9 @@ int main(){
   //POINT_11
   Eigen::MatrixXd matrixWithEdgeDetection(height,width);
   matrixWithEdgeDetection = convMatrixA3 * vector_V;
+
+  matrixWithEdgeDetection= rangeCheck(matrixWithEdgeDetection);
+
   printImage("outputImages/11_imageWithEdgeDetection.png",height,width,matrixWithEdgeDetection);
 
   //POINT_12
