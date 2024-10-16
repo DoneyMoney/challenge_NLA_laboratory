@@ -27,40 +27,43 @@ int printImage(std::string path, int h , int w , Eigen::MatrixXd mat){
   return 0;
 }
 
-int main()
-{
-    const char *input_image_path = "assets/256px-Albert_Einstein_Head.jpg";
+int main(){
+  const char *input_image_path = "assets/256px-Albert_Einstein_Head.jpg";
 
-    int width, height, channels;
-    unsigned char *image_data = stbi_load(input_image_path, &width, &height, &channels, 1);
+  int width, height, channels;
+  unsigned char *image_data = stbi_load(input_image_path, &width, &height, &channels, 1);
 
-    if (!image_data)
-    {
-        std::cerr << "Error: Could not load image " << input_image_path << std::endl;
-        return 1;
+  if (!image_data) {
+    std::cerr << "Error: Could not load image " << input_image_path << std::endl;
+    return 1;
+  }
+
+  // POINT_1
+  MatrixXd originalEinsteinMat(height, width);
+  for (int i = 0; i < height; i++){
+    for (int j = 0; j < width; j++){
+      int index = (i * width + j);
+      originalEinsteinMat(i, j) = static_cast<double>(image_data[index]);
     }
+  }
 
-    // POINT_1
-    Eigen::MatrixXd originalEinsteinMat(height, width);
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
-        {
-            int index = (i * width + j);
-            originalEinsteinMat(i, j) = static_cast<double>(image_data[index]);
-        }
-    }
+  MatrixXd task1Mat= (originalEinsteinMat.transpose()) * originalEinsteinMat;
+  std::cout << "A(T) * A norm is: " << task1Mat.norm() << std::endl;
 
-    Eigen::MatrixXd taks1Mat= (originalEinsteinMat.transpose()) * originalEinsteinMat;
-    std::cout << "A(T) * A norm is: " << taks1Mat.norm() << std::endl;
+  printImage("outputImages/0_testFirstOutput.png", height, width, originalEinsteinMat);
 
-    printImage("outputImages/0_testFirstOutput.png", height, width, originalEinsteinMat);
+  // POINT_2
+  EigenSolver<MatrixXd> eigensolver(task1Mat);
+  VectorXcd eigenValues = eigensolver.eigenvalues();
+  
+  std::cout << "First eigenvalue: " << eigenValues(0) << std::endl;
+  std::cout << "Second eigenvalue: " << eigenValues(1) << std::endl;
 
-    // POINT_2
-    EigenSolver<MatrixXd> eigensolver(taks1Mat);
-    Eigen::VectorXcd eigenValues = eigensolver.eigenvalues();
-    
-    std::cout << "First eigenvalue: " << eigenValues(0) << std::endl;
-    std::cout << "Second eigenvalue: " << eigenValues(1) << std::endl;
+  // POINT_3
+  // SparseMatrix<Double> task3Matrix;
+  std::string matrixFileOut("./lis-2.1.6/test/task1Mat.mtx"); // task1Mat is A^T * A
+  saveMarket(task1Mat, matrixFileOut);
+  // mpirun -n 1 ./eigen1 task1Mat.mtx eigvec_task3.txt hist_task3.txt -etol 1.e-8 -ss 2
+  // al momento non funzionante, calcola solo il primo
 
 }
