@@ -59,7 +59,7 @@ int main(){
   std::cout << "First eigenvalue: " << eigenValues(0) << std::endl;
   std::cout << "Second eigenvalue: " << eigenValues(1) << std::endl;
 
-  // POINT_3
+  // POINT_3: power method
   // SparseMatrix<Double> task3Matrix;
   std::string matrixFileOut("./lis-2.1.6/test/task1Mat.mtx"); // task1Mat is A^T * A
   saveMarket(task1Mat, matrixFileOut);
@@ -67,6 +67,13 @@ int main(){
   // e.v. with eigensolver = 1.04582e+09,0
   // e.v with lis = 1.045818e+09
 
-  //POINT_4
-  
+  //POINT_4: shift
+  /*
+  i used inverse method and a shift equals to 1.0458e9; i obtained 3 iterations.
+  mpirun -n 1 ./eigen1 task1Mat.mtx eigvec_task3.txt hist_task3.txt -e ii -etol 1.e-8 -shift 1.0458e9
+  */
+
+  //POINT_5: bisogna aspettare il prossimo lab, ancora non lo spiega
+  //POINT_6: bisogna aspettare il prossimo lab, ancora non lo spiega
+  //POINT_7: bisogna aspettare il prossimo lab, ancora non lo spiega
 }
