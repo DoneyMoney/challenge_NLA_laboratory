@@ -8,6 +8,8 @@
 #include "../external_libraries/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../external_libraries/stb_image_write.h"
+#define SQUARE_CHECKBOARD 8
+#define SQUARE_DIM 25
 
 using namespace Eigen;
 
@@ -76,4 +78,36 @@ int main(){
   //POINT_5: bisogna aspettare il prossimo lab, ancora non lo spiega
   //POINT_6: bisogna aspettare il prossimo lab, ancora non lo spiega
   //POINT_7: bisogna aspettare il prossimo lab, ancora non lo spiega
+
+  //POINT_8: create checkboard image
+  int checkboardHeight, checkboardWidth;
+  checkboardHeight = checkboardWidth = 200;
+  //checkboard of 8x8 squares; every square is 25x25
+  MatrixXd checkboardMatrix(checkboardHeight, checkboardWidth);
+  for(int i=0; i<SQUARE_CHECKBOARD; i++){
+    for(int j=0; j<SQUARE_CHECKBOARD; j++){
+      double color = 255.0*((i+j)%2);
+      for(int x=0; x<SQUARE_DIM; x++){
+        for(int y=0; y<SQUARE_DIM; y++){
+          checkboardMatrix(x + i*SQUARE_DIM, y + j*SQUARE_DIM) = color;
+        }
+      }
+    }
+  }
+  std::cout << "checkboard norm is: " << checkboardMatrix.norm() << std::endl;
+  printImage("outputImages/8_checkboardOriginal.png", checkboardHeight, checkboardWidth, checkboardMatrix);
+
+  //POINT_9: noise
+  MatrixXd noiseMatrix = MatrixXd::Random(checkboardHeight,checkboardWidth);
+  MatrixXd noiseCheckboardMatrix = checkboardMatrix;
+
+  for(int i=0; i<checkboardHeight;i++){
+    for(int j=0; j<checkboardWidth;j++){
+      noiseCheckboardMatrix(i,j) = noiseCheckboardMatrix(i,j) + (noiseMatrix(i,j) * 50);
+      noiseCheckboardMatrix(i,j) = noiseCheckboardMatrix(i,j) > 255.0 ? 255.0 : noiseCheckboardMatrix(i,j);
+      noiseCheckboardMatrix(i,j) = noiseCheckboardMatrix(i,j) < 0 ? 0 : noiseCheckboardMatrix(i,j);
+    }
+  }
+  printImage("outputImages/8_checkboardNoise.png", checkboardHeight, checkboardWidth, noiseCheckboardMatrix);
+
 }
