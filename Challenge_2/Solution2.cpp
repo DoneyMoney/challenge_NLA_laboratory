@@ -31,6 +31,16 @@ int printImage(std::string path, int h , int w , Eigen::MatrixXd mat){
   return 0;
 }
 
+int NumOfNonZeroEntries(MatrixXd mat){
+  int nonZeroes = 0;
+  for(int i = 0; i < mat.rows(); ++i){
+    for(int j = 0; j < mat.cols(); ++j){
+      if(mat(i,j) != 0) nonZeroes++;
+    }
+  }
+  return nonZeroes;
+}
+
 int main(){
   const char *input_image_path = "assets/256px-Albert_Einstein_Head.jpg";
 
@@ -52,7 +62,7 @@ int main(){
   }
 
   MatrixXd task1Mat= (originalEinsteinMat.transpose()) * originalEinsteinMat;
-  std::cout << "A(T) * A norm is: " << task1Mat.norm() << std::endl;
+  std::cout <<"Point 1:\n   A(T) * A norm is: " << task1Mat.norm() << std::endl;
 
   printImage("outputImages/0_testFirstOutput.png", height, width, originalEinsteinMat);
 
@@ -60,8 +70,8 @@ int main(){
   EigenSolver<MatrixXd> eigensolver(task1Mat);
   VectorXcd eigenValues = eigensolver.eigenvalues();
   
-  std::cout << "First eigenvalue: " << eigenValues(0) << std::endl;
-  std::cout << "Second eigenvalue: " << eigenValues(1) << std::endl;
+  std::cout << "  First eigenvalue: " << eigenValues(0) << std::endl;
+  std::cout << "  Second eigenvalue: " << eigenValues(1) << std::endl;
 
   // POINT_3: power method
   // SparseMatrix<Double> task3Matrix;
@@ -77,12 +87,31 @@ int main(){
   mpirun -n 1 ./eigen1 task1Mat.mtx eigvec_task3.txt hist_task3.txt -e ii -etol 1.e-8 -shift 1.0458e9
   */
 
-  //POINT_5: bisogna aspettare il prossimo lab, ancora non lo spiega Eigen::BDCSVD 
-  Eigen::BDCSVD svd (originalEinsteinMat, Eigen::ComputeFullU | Eigen::ComputeFullV); 
+  //POINT_5: SVD on A 
+  Eigen::BDCSVD svd (originalEinsteinMat, Eigen::ComputeThinU | Eigen::ComputeThinV); 
   MatrixXd diagonalA = svd.singularValues().asDiagonal();
-  std::cout << "The norm of the diagonal matrix Σ of the singular values is: " << diagonalA.norm() <<std::endl;
+  std::cout <<"Point 5:\n The norm of the diagonal matrix Σ of the singular values is: " << diagonalA.norm() <<std::endl;
 
-  //POINT_6: bisogna aspettare il prossimo lab, ancora non lo spiega
+  //POINT_6: truncated SVD considering k = 40 and k = 80 
+  int k1 = 40, k2 = 80;
+
+  MatrixXd MatrixC40(height,k1), MatrixD40(width,k1);  
+  MatrixXd MatrixC80(height,k2), MatrixD80(width,k2);  
+
+  for(int i = 0; i<k1; ++i){
+    MatrixC40.col(i) =  svd.matrixU().col(i);
+    MatrixD40.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+  }
+
+  std::cout<<"Point 6:\n  For K = 40 the non zero entries are C->"<< NumOfNonZeroEntries(MatrixC40) <<" D->" << NumOfNonZeroEntries(MatrixD40) << std::endl;
+
+  for(int i = 0; i<k2; ++i){
+    MatrixC80.col(i) =  svd.matrixU().col(i);
+    MatrixD80.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+  }
+
+  std::cout<<"  For K = 80 the non zero entries are C->"<< NumOfNonZeroEntries(MatrixC80) <<" D->" << NumOfNonZeroEntries(MatrixD80) << std::endl;
+
   //POINT_7: bisogna aspettare il prossimo lab, ancora non lo spiega
 
   //POINT_8: create checkboard image
@@ -100,7 +129,7 @@ int main(){
       }
     }
   }
-  std::cout << "checkboard norm is: " << checkboardMatrix.norm() << std::endl;
+  std::cout << "Point 8:\n  checkboard norm is: " << checkboardMatrix.norm() << std::endl;
   printImage("outputImages/8_checkboardOriginal.png", checkboardHeight, checkboardWidth, checkboardMatrix);
 
   //POINT_9: noise
@@ -115,5 +144,10 @@ int main(){
     }
   }
   printImage("outputImages/8_checkboardNoise.png", checkboardHeight, checkboardWidth, noiseCheckboardMatrix);
+
+  //POINT_10: SVD
+  Eigen::BDCSVD svdCheckboard (noiseCheckboardMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV); 
+  VectorXd singValues = svdCheckboard.singularValues();
+  std::cout <<"Point 10:\n  The two largest singular values are: " <<  singValues(0) << " and " << singValues(1) << std::endl; 
 
 }
