@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <unsupported/Eigen/SparseExtra>
 #include <Eigen/IterativeLinearSolvers>
+#include <Eigen/Core>
+#include <Eigen/SVD>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../external_libraries/stb_image.h"
@@ -41,7 +43,7 @@ int main(){
   }
 
   // POINT_1
-  MatrixXd originalEinsteinMat(height, width);
+  MatrixXd originalEinsteinMat(height, width); //Matrix A
   for (int i = 0; i < height; i++){
     for (int j = 0; j < width; j++){
       int index = (i * width + j);
@@ -75,7 +77,11 @@ int main(){
   mpirun -n 1 ./eigen1 task1Mat.mtx eigvec_task3.txt hist_task3.txt -e ii -etol 1.e-8 -shift 1.0458e9
   */
 
-  //POINT_5: bisogna aspettare il prossimo lab, ancora non lo spiega
+  //POINT_5: bisogna aspettare il prossimo lab, ancora non lo spiega Eigen::BDCSVD 
+  Eigen::BDCSVD svd (originalEinsteinMat, Eigen::ComputeFullU | Eigen::ComputeFullV); 
+  MatrixXd diagonalA = svd.singularValues().asDiagonal();
+  std::cout << "The norm of the diagonal matrix Σ of the singular values is: " << diagonalA.norm() <<std::endl;
+
   //POINT_6: bisogna aspettare il prossimo lab, ancora non lo spiega
   //POINT_7: bisogna aspettare il prossimo lab, ancora non lo spiega
 
