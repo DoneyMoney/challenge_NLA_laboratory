@@ -70,7 +70,7 @@ int main(){
   EigenSolver<MatrixXd> eigensolver(task1Mat);
   VectorXcd eigenValues = eigensolver.eigenvalues();
   
-  std::cout << "  First eigenvalue: " << eigenValues(0) << std::endl;
+  std::cout << "Point 2:\n  First eigenvalue: " << eigenValues(0) << std::endl;
   std::cout << "  Second eigenvalue: " << eigenValues(1) << std::endl;
 
   // POINT_3: power method
@@ -83,7 +83,7 @@ int main(){
 
   //POINT_4: shift
   /*
-  i used inverse method and a shift equals to 1.0458e9; i obtained 3 iterations.
+  I used the inverse power method and a shift equals to 1.0458e9; i obtained 3 iterations.
   mpirun -n 1 ./eigen1 task1Mat.mtx eigvec_task3.txt hist_task3.txt -e ii -etol 1.e-8 -shift 1.0458e9
   */
 
@@ -95,24 +95,31 @@ int main(){
   //POINT_6: truncated SVD considering k = 40 and k = 80 
   int k1 = 40, k2 = 80;
 
-  MatrixXd MatrixC40(height,k1), MatrixD40(width,k1);  
-  MatrixXd MatrixC80(height,k2), MatrixD80(width,k2);  
+  MatrixXd matrixC40(height,k1), matrixD40(width,k1);  
+  MatrixXd matrixC80(height,k2), matrixD80(width,k2);  
 
   for(int i = 0; i<k1; ++i){
-    MatrixC40.col(i) =  svd.matrixU().col(i);
-    MatrixD40.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+    matrixC40.col(i) =  svd.matrixU().col(i);
+    matrixD40.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
   }
 
-  std::cout<<"Point 6:\n  For K = 40 the non zero entries are C->"<< NumOfNonZeroEntries(MatrixC40) <<" D->" << NumOfNonZeroEntries(MatrixD40) << std::endl;
+  std::cout<<"Point 6:\n  For K = 40 the non zero entries are: C-> "<< NumOfNonZeroEntries(matrixC40) <<"  D-> " << NumOfNonZeroEntries(matrixD40) << std::endl;
 
   for(int i = 0; i<k2; ++i){
-    MatrixC80.col(i) =  svd.matrixU().col(i);
-    MatrixD80.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+    matrixC80.col(i) =  svd.matrixU().col(i);
+    matrixD80.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
   }
 
-  std::cout<<"  For K = 80 the non zero entries are C->"<< NumOfNonZeroEntries(MatrixC80) <<" D->" << NumOfNonZeroEntries(MatrixD80) << std::endl;
+  std::cout<<"  For K = 80 the non zero entries are: C-> "<< NumOfNonZeroEntries(matrixC80) <<"  D-> " << NumOfNonZeroEntries(matrixD80) << std::endl;
 
-  //POINT_7: bisogna aspettare il prossimo lab, ancora non lo spiega
+  //POINT_7: Compressed images creation
+  MatrixXd compressedImage40,compressedImage80;
+
+  compressedImage40 = matrixC40 * matrixD40.transpose();
+  compressedImage80 = matrixC80 * matrixD80.transpose();
+
+  printImage("outputImages/compressedImagek40.png",height,width,compressedImage40);
+  printImage("outputImages/compressedImagek80.png",height,width,compressedImage80);
 
   //POINT_8: create checkboard image
   int checkboardHeight, checkboardWidth;
@@ -145,9 +152,28 @@ int main(){
   }
   printImage("outputImages/8_checkboardNoise.png", checkboardHeight, checkboardWidth, noiseCheckboardMatrix);
 
-  //POINT_10: SVD
+  //POINT_10: SVD on the noisy image
   Eigen::BDCSVD svdCheckboard (noiseCheckboardMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV); 
   VectorXd singValues = svdCheckboard.singularValues();
   std::cout <<"Point 10:\n  The two largest singular values are: " <<  singValues(0) << " and " << singValues(1) << std::endl; 
 
+  //Point 11: C and D from previously svd
+  int k3 = 5, k4 = 10;
+  MatrixXd matrixC5(height,k3), matrixD5(width,k3);  
+  MatrixXd matrixC10(height,k4), matrixD10(width,k4);  
+
+  for(int i = 0; i<k3; ++i){
+    matrixC5.col(i) =  svd.matrixU().col(i);
+    matrixD5.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+  }
+
+  std::cout<<"Point 11:\n  For K = 5 the size are: C-> "<< matrixC5.rows()<<"x"<<matrixC5.cols() <<"  D-> " << matrixD5.rows()<<"x"<<matrixD5.cols() << std::endl;
+
+  for(int i = 0; i<k4; ++i){
+    matrixC10.col(i) =  svd.matrixU().col(i);
+    matrixD10.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+  }
+
+  std::cout<<"  For K = 5 the size are: C-> "<< matrixC10.rows()<<"x"<<matrixC10.cols() <<"  D-> " << matrixD10.rows()<<"x"<<matrixD10.cols() << std::endl;
+  
 }
