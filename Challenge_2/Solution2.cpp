@@ -41,6 +41,17 @@ int NumOfNonZeroEntries(MatrixXd mat){
   return nonZeroes;
 }
 
+
+Eigen::MatrixXd rangeCheck (Eigen::MatrixXd matrix){
+    // Ensure values are within the range [0, 255]
+  for(int i = 0; i < matrix.rows(); i++) {
+    for(int j = 0; j < matrix.cols(); j++) {
+      matrix(i, j) = std::min(255.0, std::max(0.0, matrix(i, j)));
+    }
+  }
+  return matrix;
+}
+
 int main(){
   const char *input_image_path = "assets/256px-Albert_Einstein_Head.jpg";
 
@@ -116,7 +127,9 @@ int main(){
   MatrixXd compressedImage40,compressedImage80;
 
   compressedImage40 = matrixC40 * matrixD40.transpose();
+  compressedImage40 = rangeCheck(compressedImage40);
   compressedImage80 = matrixC80 * matrixD80.transpose();
+  compressedImage80 = rangeCheck(compressedImage80);
 
   printImage("outputImages/compressedImagek40.png",height,width,compressedImage40);
   printImage("outputImages/compressedImagek80.png",height,width,compressedImage80);
@@ -174,13 +187,15 @@ int main(){
     matrixD10.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
   }
 
-  std::cout<<"  For K = 5 the size are: C-> "<< matrixC10.rows()<<"x"<<matrixC10.cols() <<"  D-> " << matrixD10.rows()<<"x"<<matrixD10.cols() << std::endl;
+  std::cout<<"  For K = 10 the size are: C-> "<< matrixC10.rows()<<"x"<<matrixC10.cols() <<"  D-> " << matrixD10.rows()<<"x"<<matrixD10.cols() << std::endl;
   
   //Point 12: Compressed images for k=5 and k=10
   MatrixXd compressedImage5,compressedImage10;
 
   compressedImage5 = matrixC5 * matrixD5.transpose();
+  compressedImage5 = rangeCheck(compressedImage5);
   compressedImage10 = matrixC10 * matrixD10.transpose();
+  compressedImage10 = rangeCheck(compressedImage10);
 
   printImage("outputImages/compressedImagek5.png",height,width,compressedImage5);
   printImage("outputImages/compressedImagek10.png",height,width,compressedImage10);
