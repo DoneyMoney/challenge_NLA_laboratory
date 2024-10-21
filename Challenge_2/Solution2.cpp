@@ -157,7 +157,7 @@ int main(){
   VectorXd singValues = svdCheckboard.singularValues();
   std::cout <<"Point 10:\n  The two largest singular values are: " <<  singValues(0) << " and " << singValues(1) << std::endl; 
 
-  //Point 11: C and D from previously svd
+  //Point 11: C and D from previously svd of the noisy images
   int k3 = 5, k4 = 10;
   MatrixXd matrixC5(height,k3), matrixD5(width,k3);  
   MatrixXd matrixC10(height,k4), matrixD10(width,k4);  
@@ -176,4 +176,13 @@ int main(){
 
   std::cout<<"  For K = 5 the size are: C-> "<< matrixC10.rows()<<"x"<<matrixC10.cols() <<"  D-> " << matrixD10.rows()<<"x"<<matrixD10.cols() << std::endl;
   
+  //Point 12: Compressed images for k=5 and k=10
+  MatrixXd compressedImage5,compressedImage10;
+
+  compressedImage5 = matrixC5 * matrixD5.transpose();
+  compressedImage10 = matrixC10 * matrixD10.transpose();
+
+  printImage("outputImages/compressedImagek5.png",height,width,compressedImage5);
+  printImage("outputImages/compressedImagek10.png",height,width,compressedImage10);
+
 }
