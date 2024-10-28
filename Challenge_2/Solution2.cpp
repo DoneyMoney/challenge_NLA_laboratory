@@ -172,19 +172,21 @@ int main(){
 
   //Point 11: C and D from previously svd of the noisy images
   int k3 = 5, k4 = 10;
-  MatrixXd matrixC5(height,k3), matrixD5(width,k3);  
-  MatrixXd matrixC10(height,k4), matrixD10(width,k4);  
+  MatrixXd matrixC5(checkboardHeight,k3), matrixD5(checkboardWidth,k3);  
+  MatrixXd matrixC10(checkboardHeight,k4), matrixD10(checkboardWidth,k4);  
 
   for(int i = 0; i<k3; ++i){
-    matrixC5.col(i) =  svd.matrixU().col(i);
-    matrixD5.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+    matrixC5.col(i) =  svdCheckboard.matrixU().col(i);
+    // printf("pisello " + i);
+    matrixD5.col(i) =  svdCheckboard.singularValues()(i) * svdCheckboard.matrixV().col(i);
+    // printf("pinga " + i);
   }
 
   std::cout<<"Point 11:\n  For K = 5 the size are: C-> "<< matrixC5.rows()<<"x"<<matrixC5.cols() <<"  D-> " << matrixD5.rows()<<"x"<<matrixD5.cols() << std::endl;
 
   for(int i = 0; i<k4; ++i){
-    matrixC10.col(i) =  svd.matrixU().col(i);
-    matrixD10.col(i) =  svd.singularValues()(i) * svd.matrixV().col(i);
+    matrixC10.col(i) =  svdCheckboard.matrixU().col(i);
+    matrixD10.col(i) =  svdCheckboard.singularValues()(i) * svdCheckboard.matrixV().col(i);
   }
 
   std::cout<<"  For K = 10 the size are: C-> "<< matrixC10.rows()<<"x"<<matrixC10.cols() <<"  D-> " << matrixD10.rows()<<"x"<<matrixD10.cols() << std::endl;
