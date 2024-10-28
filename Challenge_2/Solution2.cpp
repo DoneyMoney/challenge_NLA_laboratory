@@ -131,8 +131,8 @@ int main(){
   compressedImage80 = matrixC80 * matrixD80.transpose();
   compressedImage80 = rangeCheck(compressedImage80);
 
-  printImage("outputImages/compressedImagek40.png",height,width,compressedImage40);
-  printImage("outputImages/compressedImagek80.png",height,width,compressedImage80);
+  printImage("outputImages/7_compressedImagek40.png",height,width,compressedImage40);
+  printImage("outputImages/7_compressedImagek80.png",height,width,compressedImage80);
 
   //POINT_8: create checkboard image
   int checkboardHeight, checkboardWidth;
@@ -198,7 +198,7 @@ int main(){
   compressedImage10 = matrixC10 * matrixD10.transpose();
   compressedImage10 = rangeCheck(compressedImage10);
 
-  printImage("outputImages/compressedImagek5.png", checkboardHeight, checkboardWidth, compressedImage5);
-  printImage("outputImages/compressedImagek10.png", checkboardHeight, checkboardWidth, compressedImage10);
+  printImage("outputImages/12_compressedImagek5.png", checkboardHeight, checkboardWidth, compressedImage5);
+  printImage("outputImages/12_compressedImagek10.png", checkboardHeight, checkboardWidth, compressedImage10);
 
 }
