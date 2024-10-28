@@ -159,10 +159,9 @@ int main(){
   for(int i=0; i<checkboardHeight;i++){
     for(int j=0; j<checkboardWidth;j++){
       noiseCheckboardMatrix(i,j) = noiseCheckboardMatrix(i,j) + (noiseMatrix(i,j) * 50);
-      noiseCheckboardMatrix(i,j) = noiseCheckboardMatrix(i,j) > 255.0 ? 255.0 : noiseCheckboardMatrix(i,j);
-      noiseCheckboardMatrix(i,j) = noiseCheckboardMatrix(i,j) < 0 ? 0 : noiseCheckboardMatrix(i,j);
     }
   }
+  noiseCheckboardMatrix = rangeCheck(noiseCheckboardMatrix);
   printImage("outputImages/8_checkboardNoise.png", checkboardHeight, checkboardWidth, noiseCheckboardMatrix);
 
   //POINT_10: SVD on the noisy image
@@ -199,7 +198,7 @@ int main(){
   compressedImage10 = matrixC10 * matrixD10.transpose();
   compressedImage10 = rangeCheck(compressedImage10);
 
-  printImage("outputImages/compressedImagek5.png",height,width,compressedImage5);
-  printImage("outputImages/compressedImagek10.png",height,width,compressedImage10);
+  printImage("outputImages/compressedImagek5.png", checkboardHeight, checkboardWidth, compressedImage5);
+  printImage("outputImages/compressedImagek10.png", checkboardHeight, checkboardWidth, compressedImage10);
 
 }
