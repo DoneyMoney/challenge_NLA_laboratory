@@ -94,7 +94,7 @@ int main(){
 
   //POINT_4: shift
   /*
-  I used the inverse power method and a shift equals to 1.0458e9; i obtained 3 iterations.
+  I used the inverse power method and a shift equals to 1.0458e+9; i obtained 3 iterations.
   mpirun -n 1 ./eigen1 task1Mat.mtx eigvec_task3.txt hist_task3.txt -e ii -etol 1.e-8 -shift 1.0458e9
   */
 
@@ -150,7 +150,7 @@ int main(){
     }
   }
   std::cout << "Point 8:\n  checkboard norm is: " << checkboardMatrix.norm() << std::endl;
-  printImage("outputImages/8_checkboardOriginal.png", checkboardHeight, checkboardWidth, checkboardMatrix);
+  printImage("outputImages/9_checkboardOriginal.png", checkboardHeight, checkboardWidth, checkboardMatrix);
 
   //POINT_9: noise
   MatrixXd noiseMatrix = MatrixXd::Random(checkboardHeight,checkboardWidth);
@@ -162,7 +162,7 @@ int main(){
     }
   }
   noiseCheckboardMatrix = rangeCheck(noiseCheckboardMatrix);
-  printImage("outputImages/8_checkboardNoise.png", checkboardHeight, checkboardWidth, noiseCheckboardMatrix);
+  printImage("outputImages/9_checkboardNoise.png", checkboardHeight, checkboardWidth, noiseCheckboardMatrix);
 
   //POINT_10: SVD on the noisy image
   Eigen::BDCSVD svdCheckboard (noiseCheckboardMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV); 
@@ -176,9 +176,7 @@ int main(){
 
   for(int i = 0; i<k3; ++i){
     matrixC5.col(i) =  svdCheckboard.matrixU().col(i);
-    // printf("pisello " + i);
     matrixD5.col(i) =  svdCheckboard.singularValues()(i) * svdCheckboard.matrixV().col(i);
-    // printf("pinga " + i);
   }
 
   std::cout<<"Point 11:\n  For K = 5 the size are: C-> "<< matrixC5.rows()<<"x"<<matrixC5.cols() <<"  D-> " << matrixD5.rows()<<"x"<<matrixD5.cols() << std::endl;
